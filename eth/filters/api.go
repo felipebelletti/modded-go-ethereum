@@ -178,6 +178,35 @@ func (api *FilterAPI) NewPendingTransactions(ctx context.Context, fullTx *bool) 
 	return rpcSub, nil
 }
 
+func (api *FilterAPI) NewPendingTransactionsWithLogs(ctx context.Context) (*rpc.Subscription, error) {
+	notifier, supported := rpc.NotifierFromContext(ctx)
+	if !supported {
+		return &rpc.Subscription{}, rpc.ErrNotificationsUnsupported
+	}
+
+	rpcSub := notifier.CreateSubscription()
+
+	go func() {
+		txs := make(chan types.TransactionWithLogs)
+		pendingTxSub := api.events.SubscribePendingTransactionsWithLogs(txs)
+
+		for {
+			select {
+			case txs := <-txs:
+				notifier.Notify(rpcSub.ID, txs)
+			case <-rpcSub.Err():
+				pendingTxSub.Unsubscribe()
+				return
+			case <-notifier.Closed():
+				pendingTxSub.Unsubscribe()
+				return
+			}
+		}
+	}()
+
+	return rpcSub, nil
+}
+
 // NewBlockFilter creates a filter that fetches blocks that are imported into the chain.
 // It is part of the filter package since polling goes with eth_getFilterChanges.
 func (api *FilterAPI) NewBlockFilter() rpc.ID {

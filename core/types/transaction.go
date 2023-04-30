@@ -310,6 +310,15 @@ func (tx *Transaction) To() *common.Address {
 	return copyAddressPtr(tx.inner.to())
 }
 
+// From returns the transaction sender.
+func (tx *Transaction) From() common.Address {
+	if from := tx.from.Load(); from != nil {
+		return from.(sigCache).from
+	}
+
+	return common.Address{}
+}
+
 // Cost returns (gas * gasPrice) + (blobGas * blobGasPrice) + value.
 func (tx *Transaction) Cost() *big.Int {
 	total := new(big.Int).Mul(tx.GasPrice(), new(big.Int).SetUint64(tx.Gas()))

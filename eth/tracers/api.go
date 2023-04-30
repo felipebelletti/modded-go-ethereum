@@ -88,6 +88,7 @@ type Backend interface {
 	ChainDb() ethdb.Database
 	StateAtBlock(ctx context.Context, block *types.Block, reexec uint64, base *state.StateDB, readOnly bool, preferDisk bool) (*state.StateDB, StateReleaseFunc, error)
 	StateAtTransaction(ctx context.Context, block *types.Block, txIndex int, reexec uint64) (*core.Message, vm.BlockContext, *state.StateDB, StateReleaseFunc, error)
+	StateAndHeaderByNumberOrHash(ctx context.Context, blockNrOrHash rpc.BlockNumberOrHash) (*state.StateDB, *types.Header, error)
 }
 
 // API is the collection of tracing APIs exposed over the private debugging endpoint.
@@ -897,11 +898,9 @@ func (api *API) TraceCall(ctx context.Context, args ethapi.TransactionArgs, bloc
 		block, err = api.blockByHash(ctx, hash)
 	} else if number, ok := blockNrOrHash.Number(); ok {
 		if number == rpc.PendingBlockNumber {
-			// We don't have access to the miner here. For tracing 'future' transactions,
-			// it can be done with block- and state-overrides instead, which offers
-			// more flexibility and stability than trying to trace on 'pending', since
-			// the contents of 'pending' is unstable and probably not a true representation
-			// of what the next actual block is likely to contain.
+			// in fact, reverting that line back
+			// (https://github.com/ethereum/go-ethereum/pull/21338/files#diff-fa406a35f903f7a2826290aba52257315413fda284257e152f9a9b0fcecef91aR739)
+			// should also do the job of TracePendingCall (untested)
 			return nil, errors.New("tracing on top of pending is not supported")
 		}
 		block, err = api.blockByNumber(ctx, number)
@@ -941,6 +940,24 @@ func (api *API) TraceCall(ctx context.Context, args ethapi.TransactionArgs, bloc
 		traceConfig = &config.TraceConfig
 	}
 	return api.traceTx(ctx, msg, new(Context), vmctx, statedb, traceConfig)
+}
+
+func (api *API) TracePendingCall(ctx context.Context, args ethapi.TransactionArgs, config *TraceCallConfig) (interface{}, error) {
+	// Get pending state and block header (rpc.PendingBlockNumber = -2)
+	statedb, header, err := api.backend.StateAndHeaderByNumberOrHash(ctx, rpc.BlockNumberOrHashWithNumber(rpc.PendingBlockNumber))
+	if err != nil {
+		return nil, err
+	}
+
+	// Create new EVMContext
+	evmContext := core.NewEVMBlockContext(header, api.chainContext(ctx), nil)
+
+	msg, err := args.ToMessage(api.backend.RPCGasCap(), header.BaseFee)
+	if err != nil {
+		return nil, err
+	}
+
+	return api.traceTx(ctx, msg, new(Context), evmContext, statedb, &config.TraceConfig)
 }
 
 // traceTx configures a new tracer according to the provided configuration, and

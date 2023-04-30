@@ -233,6 +233,13 @@ func (b *LesApiBackend) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.S
 	return b.eth.txPool.SubscribeNewTxsEvent(ch)
 }
 
+func (b *LesApiBackend) SubscribePendingTransactionsWithLogsEvent(ch chan<- types.TransactionWithLogs) event.Subscription {
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		<-quit
+		return nil
+	})
+}
+
 func (b *LesApiBackend) SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription {
 	return b.eth.blockchain.SubscribeChainEvent(ch)
 }

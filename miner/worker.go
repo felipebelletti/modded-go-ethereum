@@ -200,6 +200,9 @@ type worker struct {
 	// Feeds
 	pendingLogsFeed event.Feed
 
+	// Feeds
+	pendingTransactionsWithLogs event.Feed
+
 	// Subscriptions
 	mux          *event.TypeMux
 	txsCh        chan core.NewTxsEvent
@@ -917,6 +920,20 @@ func (w *worker) commitTransactions(env *environment, txs *types.TransactionsByP
 		env.state.SetTxContext(tx.Hash(), env.tcount)
 
 		logs, err := w.commitTransaction(env, tx)
+
+		/*
+			fmt.Println(tx.Hash())
+			for _, log := range logs {
+				fmt.Println(log.Topics, log.TxHash)
+			}
+		*/
+		go func(_tx *types.Transaction, _logs []*types.Log) {
+			w.pendingTransactionsWithLogs.Send(types.TransactionWithLogs{
+				Transaction: _tx,
+				Logs:        _logs,
+			})
+		}(tx, logs)
+
 		switch {
 		case errors.Is(err, core.ErrNonceTooLow):
 			// New head notification data race between the transaction pool and miner, shift

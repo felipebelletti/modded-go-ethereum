@@ -251,6 +251,12 @@ func (miner *Miner) SubscribePendingLogs(ch chan<- []*types.Log) event.Subscript
 	return miner.worker.pendingLogsFeed.Subscribe(ch)
 }
 
+// SubscribePendingLogs starts delivering logs from pending transactions
+// to the given channel.
+func (miner *Miner) SubscribePendingTransactionsWithLogs(ch chan<- types.TransactionWithLogs) event.Subscription {
+	return miner.worker.pendingTransactionsWithLogs.Subscribe(ch)
+}
+
 // BuildPayload builds the payload according to the provided parameters.
 func (miner *Miner) BuildPayload(args *BuildPayloadArgs) (*Payload, error) {
 	return miner.worker.buildPayload(args)

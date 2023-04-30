@@ -330,6 +330,15 @@ func (ec *Client) SubscribeNewHead(ctx context.Context, ch chan<- *types.Header)
 	return sub, nil
 }
 
+// SubscribeNewPendingTransactionsWithLogs subscribes to new transactions along their respectives emitted logs.
+func (ec *Client) SubscribeNewPendingTransactionsWithLogs(ctx context.Context, ch chan<- types.PendingTxWithLogs) (ethereum.Subscription, error) {
+	sub, err := ec.c.EthSubscribe(ctx, ch, "newPendingTransactionsWithLogs")
+	if err != nil {
+		return nil, err
+	}
+	return sub, nil
+}
+
 // State Access
 
 // NetworkID returns the network ID for this client.

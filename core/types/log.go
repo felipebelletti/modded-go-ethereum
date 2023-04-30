@@ -55,6 +55,35 @@ type Log struct {
 	Removed bool `json:"removed"`
 }
 
+type TransactionWithLogs struct {
+	Transaction *Transaction
+	Logs        []*Log
+}
+
+/*
+Hacky way to get the logs to be marshaled as a list of objects, thus
+allowing me to parse the delivered tx->from object
+
+If developing some internal code for go-ethereum, you probably want to use the
+TransactionWithLogs struct, that's just a hacky way to avoid headaches
+*/
+type PendingTxWithLogs struct {
+	Transaction struct {
+		From                 common.Address
+		To                   *common.Address
+		Hash                 common.Hash
+		Gas                  *hexutil.Big
+		GasPrice             *hexutil.Big
+		MaxPriorityFeePerGas *hexutil.Big
+		MaxFeePerGas         *hexutil.Big
+		Value                *hexutil.Big
+		Nonce                hexutil.Uint64
+		Data                 hexutil.Bytes
+		Type                 hexutil.Uint
+	} `json:"transaction"`
+	Logs []*Log
+}
+
 type logMarshaling struct {
 	Data        hexutil.Bytes
 	BlockNumber hexutil.Uint64

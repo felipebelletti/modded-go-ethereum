@@ -41,6 +41,7 @@ type txJSON struct {
 	R                    *hexutil.Big    `json:"r"`
 	S                    *hexutil.Big    `json:"s"`
 	To                   *common.Address `json:"to"`
+	From                 common.Address  `json:"from"`
 
 	// Access list transaction fields:
 	ChainID    *hexutil.Big `json:"chainId,omitempty"`
@@ -66,6 +67,7 @@ func (tx *Transaction) MarshalJSON() ([]byte, error) {
 		enc.Value = (*hexutil.Big)(itx.Value)
 		enc.Data = (*hexutil.Bytes)(&itx.Data)
 		enc.To = tx.To()
+		enc.From = tx.From()
 		enc.V = (*hexutil.Big)(itx.V)
 		enc.R = (*hexutil.Big)(itx.R)
 		enc.S = (*hexutil.Big)(itx.S)
@@ -78,6 +80,7 @@ func (tx *Transaction) MarshalJSON() ([]byte, error) {
 		enc.Value = (*hexutil.Big)(itx.Value)
 		enc.Data = (*hexutil.Bytes)(&itx.Data)
 		enc.To = tx.To()
+		enc.From = tx.From()
 		enc.V = (*hexutil.Big)(itx.V)
 		enc.R = (*hexutil.Big)(itx.R)
 		enc.S = (*hexutil.Big)(itx.S)
@@ -91,6 +94,7 @@ func (tx *Transaction) MarshalJSON() ([]byte, error) {
 		enc.Value = (*hexutil.Big)(itx.Value)
 		enc.Data = (*hexutil.Bytes)(&itx.Data)
 		enc.To = tx.To()
+		enc.From = tx.From()
 		enc.V = (*hexutil.Big)(itx.V)
 		enc.R = (*hexutil.Big)(itx.R)
 		enc.S = (*hexutil.Big)(itx.S)
