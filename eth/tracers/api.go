@@ -36,7 +36,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/eth/tracers"
 	"github.com/ethereum/go-ethereum/eth/tracers/logger"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/internal/ethapi"
@@ -942,30 +941,6 @@ func (api *API) TraceCall(ctx context.Context, args ethapi.TransactionArgs, bloc
 		traceConfig = &config.TraceConfig
 	}
 	return api.traceTx(ctx, msg, new(Context), vmctx, statedb, traceConfig)
-}
-
-func (api *API) CallPending(ctx context.Context, args ethapi.TransactionArgs) (interface{}, error) {
-	// Get pending state and block header (rpc.PendingBlockNumber = -2)
-	statedb, header, err := api.backend.StateAndHeaderByNumberOrHash(ctx, rpc.BlockNumberOrHashWithNumber(rpc.PendingBlockNumber))
-	if err != nil {
-		return nil, err
-	}
-
-	// Create new EVMContext
-	evmContext := core.NewEVMBlockContext(header, api.chainContext(ctx), nil)
-
-	msg, err := args.ToMessage(api.backend.RPCGasCap(), header.BaseFee)
-	if err != nil {
-		return nil, err
-	}
-
-	result, err := api.traceTx(ctx, msg, new(Context), evmContext, statedb, &TraceConfig{Tracer: &tracers.CallTracer})
-	if err != nil {
-		return nil, err
-	}
-
-	output := result.(map[string]interface{})["output"].(string)
-	return output, nil
 }
 
 func (api *API) TracePendingCall(ctx context.Context, args ethapi.TransactionArgs, config *TraceCallConfig) (interface{}, error) {
