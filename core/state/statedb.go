@@ -609,6 +609,11 @@ func (s *StateDB) setStateObject(object *stateObject) {
 	s.stateObjects[object.Address()] = object
 }
 
+// DeleteStateObject removes the given object from the state trie.
+func (s *StateDB) DeleteStateObject(addr common.Address) {
+	delete(s.stateObjects, addr)
+}
+
 // GetOrNewStateObject retrieves a state object or create a new state object if nil.
 func (s *StateDB) GetOrNewStateObject(addr common.Address) *stateObject {
 	stateObject := s.getStateObject(addr)
