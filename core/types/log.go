@@ -78,7 +78,7 @@ type PendingTxWithLogs struct {
 		MaxFeePerGas         *hexutil.Big
 		Value                *hexutil.Big
 		Nonce                hexutil.Uint64
-		Data                 hexutil.Bytes
+		Input                hexutil.Bytes
 		Type                 hexutil.Uint
 	} `json:"transaction"`
 	Logs []*Log
