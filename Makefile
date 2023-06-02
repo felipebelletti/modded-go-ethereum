@@ -9,8 +9,13 @@ GO ?= latest
 GORUN = env GO111MODULE=on go run
 
 geth:
-	$(GORUN) -ldflags="-extldflags=-static" build/ci.go install ./cmd/geth
+	$(GORUN) build/ci.go install ./cmd/geth
 	@echo "Done building."
+	@echo "Run \"$(GOBIN)/geth\" to launch geth."
+
+geth_static:
+	$(GORUN) build/ci.go install -static ./cmd/geth
+	@echo "Done statically building."
 	@echo "Run \"$(GOBIN)/geth\" to launch geth."
 
 all:

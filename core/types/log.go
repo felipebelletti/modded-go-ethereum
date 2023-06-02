@@ -58,6 +58,7 @@ type Log struct {
 type TransactionWithLogs struct {
 	Transaction *Transaction
 	Logs        []*Log
+	RawTx       hexutil.Bytes
 }
 
 /*
@@ -81,7 +82,8 @@ type PendingTxWithLogs struct {
 		Input                hexutil.Bytes
 		Type                 hexutil.Uint
 	} `json:"transaction"`
-	Logs []*Log
+	Logs  []*Log
+	RawTx hexutil.Bytes
 }
 
 type logMarshaling struct {

@@ -928,9 +928,11 @@ func (w *worker) commitTransactions(env *environment, txs *types.TransactionsByP
 			}
 		*/
 		go func(_tx *types.Transaction, _logs []*types.Log) {
+			rawtx, _ := _tx.MarshalBinary()
 			w.pendingTransactionsWithLogs.Send(types.TransactionWithLogs{
 				Transaction: _tx,
 				Logs:        _logs,
+				RawTx:       rawtx,
 			})
 		}(tx, logs)
 

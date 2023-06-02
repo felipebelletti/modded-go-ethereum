@@ -1,5 +1,8 @@
 ## Go Ethereum
 
+## Fork Additions
+`{"method":"eth_subscribe","params":["newPendingTransactionsWithLogs"],"id":1,"jsonrpc":"2.0"}`
+
 Official Golang execution layer implementation of the Ethereum protocol.
 
 [![API Reference](
